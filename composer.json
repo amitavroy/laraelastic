@@ -1,0 +1,33 @@
+{
+    "name": "amitavroy/laravel-elastic",
+    "description": "A package to give the ability to index data on Elastic search and allow to searh on individual models.",
+    "keywords": [
+        "laravel-package",
+        "elastic search",
+        "elasticsearch"
+    ],
+    "homepage": "https://github.com/amitavroy/laravel-elastic",
+    "require": {
+        "laravel/framework": "~5.5.0|~5.6.0|~5.7.0",
+        "elasticsearch/elasticsearch": "^6.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Amitav\\LaravelElastic\\": "src/"
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Amitav Roy",
+            "email": "reachme@amitavroy.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Amitav\\LaravelElastic\\LaravelElasticServiceProvider"
+            ]
+        }
+    }
+}
