@@ -18,7 +18,7 @@ trait Searchable
         $prefix = config('laraelastic.prefix');
 
         $indexName = $prefix . $instance->getTable();
-        
+
         self::created(function ($model) use ($client, $indexName) {
             $model = $model->toArray();
 
@@ -33,8 +33,8 @@ trait Searchable
             $params = [
                 'index' => $indexName,
                 'type' => $indexName,
-                'id' => $indexName.$model['id'],
-                'body' => $model
+                'id' => $indexName . $model['id'],
+                'body' => $model,
             ];
 
             $client->index($params);
@@ -54,10 +54,10 @@ trait Searchable
             $params = [
                 'index' => $indexName,
                 'type' => $indexName,
-                'id' => $indexName.$model['id'],
+                'id' => $indexName . $model['id'],
                 'body' => [
-                    'doc' => $model
-                ]
+                    'doc' => $model,
+                ],
             ];
 
             $client->update($params);
@@ -77,7 +77,7 @@ trait Searchable
             $params = [
                 'index' => $indexName,
                 'type' => $indexName,
-                'id' => $indexName.$model['id'],
+                'id' => $indexName . $model['id'],
             ];
 
             $client->delete($params);
@@ -88,7 +88,7 @@ trait Searchable
     {
         $instance = new static;
         $prefix = config('laraelastic.prefix');
-        $indexName = $prefix. $instance->getTable();
+        $indexName = $prefix . $instance->getTable();
         $timestamps = $instance->timestamps;
 
         $client = $instance->getElasticClient();
@@ -119,14 +119,14 @@ trait Searchable
                 'index' => $indexName,
                 'type' => $indexName,
                 'id' => $record['id'],
-                'body' => $record
+                'body' => $record,
             ];
 
             $client->index($params);
         });
     }
 
-    public static function search($string)
+    public static function search($string, $formatted = false)
     {
         parent::boot();
 
@@ -150,16 +150,20 @@ trait Searchable
                 'query' => [
                     'multi_match' => [
                         'query' => $string,
-                        'fields' => $searchFields
-                    ]
-                ]
-            ]
+                        'fields' => $searchFields,
+                    ],
+                ],
+            ],
         ];
+
+        if ($formatted === true) {
+            return $instance->formatSearchResult($client->search($params), $instance);
+        }
 
         return $client->search($params);
     }
 
-    public function getElasticClient()
+    protected function getElasticClient()
     {
         $hosts = config('laraelastic.hosts');
 
@@ -168,5 +172,28 @@ trait Searchable
             ->build();
 
         return $client;
+    }
+
+    protected function formatSearchResult($result)
+    {
+        $hits = $result['hits']['hits'];
+
+        foreach ($hits as $hit) {
+            $data[] = self::recursive_collect($hit['_source']);
+        }
+
+        return $data;
+    }
+
+    protected function recursive_collect($array)
+    {
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $value = self::recursive_collect($value);
+                $array[$key] = $value;
+            }
+        }
+
+        return collect($array);
     }
 }
