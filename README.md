@@ -63,6 +63,8 @@ And the most important method, is the search. On any Eloquent model which is usi
 User::search('keyword');
 ```
 
-This will return you the Elastic search reponse with data points like the number of hits, the execution time, score and the search results.
+This will return you the Elastic search reponse with data points like the number of hits, the execution time, score and the search results. And, there is another option where you can get the result as a collection by passing a second argument as true.
 
-
+```
+User::search('keyword', true);
+```
