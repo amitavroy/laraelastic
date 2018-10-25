@@ -178,6 +178,7 @@ trait Searchable
     {
         $hits = $result['hits']['hits'];
 
+        $data = [];
         foreach ($hits as $hit) {
             $data[] = self::recursive_collect($hit['_source']);
         }
